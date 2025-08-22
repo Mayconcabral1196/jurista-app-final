@@ -1,0 +1,10 @@
+export const num = (n) => (n === "" || n === null || isNaN(Number(n)) ? 0 : Number(n));
+export const fmtBRL = (n) => Number(n || 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+export const localTodayISO = () => { const d = new Date(); const tz = d.getTimezoneOffset(); const local = new Date(d.getTime() - tz * 60000); return local.toISOString().slice(0, 10); };
+export const todayISO = () => localTodayISO();
+export const uid = () => crypto.randomUUID();
+export const save = (k, v) => localStorage.setItem(k, JSON.stringify(v));
+export const load = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k)); return v ?? d; } catch { return d; } };
+export const toLocalDate = (iso) => { if (!iso) return new Date(NaN); const [y,m,d] = iso.split('-').map(Number); return new Date(y, m-1, d); };
+export const fmtISO = (d) => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+export const addDaysISO = (iso, days) => { const d = toLocalDate(iso); d.setDate(d.getDate()+days); return fmtISO(d); };
