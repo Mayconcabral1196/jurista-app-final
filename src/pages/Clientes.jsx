@@ -5,8 +5,16 @@ import Input from '../components/ui/Input.jsx';
 import Button from '../components/ui/Button.jsx';
 import Badge from '../components/ui/Badge.jsx';
 
-// --- Componente para uma única linha da tabela (agora completo) ---
-function ClienteRow({ cliente, onUpdate }) {
+// --- Lógica comum de Score ---
+const scoreToneMap = {
+  'Excelente': 'green',
+  'Bom': 'green',
+  'Regular': 'amber',
+  'Mau': 'red',
+};
+
+// --- 1. Componente CARD (Apenas Mobile) ---
+function ClienteCard({ cliente, onUpdate }) {
   const [isEditing, setIsEditing] = useState(false);
   const [editedCliente, setEditedCliente] = useState(cliente);
 
@@ -23,12 +31,67 @@ function ClienteRow({ cliente, onUpdate }) {
     setIsEditing(false);
   };
 
-  const scoreTone = {
-    'Excelente': 'green',
-    'Bom': 'green',
-    'Regular': 'amber',
-    'Mau': 'red',
-  }[cliente.score] || 'neutral';
+  const scoreTone = scoreToneMap[cliente.score] || 'neutral';
+  
+  return (
+    <div className={`bg-slate-900 p-4 rounded-xl border ${isEditing ? 'border-emerald-600' : 'border-slate-800'} shadow-lg`}>
+      {isEditing ? (
+        // MODO EDIÇÃO
+        <div className="space-y-3">
+            <Input label="Nome" value={editedCliente.nome || ''} onChange={(e) => handleInputChange('nome', e.target.value)} />
+            <Input label="CPF" value={editedCliente.documento || ''} maxLength="11" onChange={(e) => handleInputChange('documento', e.target.value)} />
+            <Input label="Rua" value={editedCliente.rua || ''} onChange={(e) => handleInputChange('rua', e.target.value)} />
+            <div className="grid grid-cols-2 gap-3">
+                <Input label="Número" value={editedCliente.numero || ''} onChange={(e) => handleInputChange('numero', e.target.value)} />
+                <Input label="Bairro" value={editedCliente.bairro || ''} onChange={(e) => handleInputChange('bairro', e.target.value)} />
+            </div>
+            <Input label="Cidade" value={editedCliente.cidade || ''} onChange={(e) => handleInputChange('cidade', e.target.value)} />
+            
+            <div className="flex gap-2 justify-end pt-2 border-t border-slate-700">
+                <Button onClick={handleSave}>Salvar</Button>
+                <Button variant="ghost" onClick={() => setIsEditing(false)}>Cancelar</Button>
+            </div>
+        </div>
+      ) : (
+        // MODO VISUALIZAÇÃO (Card)
+        <div className="space-y-2">
+            <div className="flex justify-between items-center pb-2 border-b border-slate-800">
+                <div className="text-lg font-bold text-slate-100 truncate">{cliente.nome}</div>
+                <Button variant="ghost" onClick={() => setIsEditing(true)}>Editar</Button>
+            </div>
+            <div className="flex justify-between items-center">
+                <div className="text-sm text-slate-400">CPF: {cliente.documento}</div>
+                <Badge tone={scoreTone}>{cliente.score}</Badge>
+            </div>
+            <div className="text-xs text-slate-500 pt-1">
+                {cliente.rua}, {cliente.numero}, {cliente.cidade}
+            </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+
+// --- 2. Componente Tabela (Apenas Desktop) ---
+function ClienteTableItem({ cliente, onUpdate }) { // Componente que renderiza a TR
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedCliente, setEditedCliente] = useState(cliente);
+
+  useEffect(() => {
+    setEditedCliente(cliente);
+  }, [cliente]);
+
+  const handleInputChange = (field, value) => {
+    setEditedCliente({ ...editedCliente, [field]: value });
+  };
+
+  const handleSave = () => {
+    onUpdate(editedCliente);
+    setIsEditing(false);
+  };
+
+  const scoreTone = scoreToneMap[cliente.score] || 'neutral';
 
   return (
     <tr className="border-t border-slate-800 align-top">
@@ -145,8 +208,9 @@ function Clientes() {
   return (
     <div className="space-y-6">
       <Card title="Novo Cliente">
+        {/* === FORMULÁRIO RESPONSIVO CORRIGIDO === */}
         <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-7 gap-4 items-end">
-          <div className="lg:col-span-2">
+          <div className="md:col-span-2"> 
             <label className="block text-xs text-slate-300 mb-1">Nome Completo</label>
             <Input placeholder="Nome do Cliente" value={draft.nome} onChange={(e) => setDraft({ ...draft, nome: e.target.value })} />
           </div>
@@ -158,7 +222,7 @@ function Clientes() {
             <label className="block text-xs text-slate-300 mb-1">Data de Nascimento</label>
             <Input type="date" value={draft.nascimento} onChange={(e) => setDraft({ ...draft, nascimento: e.target.value })} />
           </div>
-          <div className="lg:col-span-3">
+          <div className="md:col-span-2 lg:col-span-3"> 
             <label className="block text-xs text-slate-300 mb-1">Rua</label>
             <Input placeholder="Ex: Rua Principal" value={draft.rua} onChange={(e) => setDraft({ ...draft, rua: e.target.value })} />
           </div>
@@ -166,22 +230,23 @@ function Clientes() {
             <label className="block text-xs text-slate-300 mb-1">Número</label>
             <Input placeholder="123" value={draft.numero} onChange={(e) => setDraft({ ...draft, numero: e.target.value })} />
           </div>
-          <div className="lg:col-span-2">
+          <div className="md:col-span-2"> 
             <label className="block text-xs text-slate-300 mb-1">Bairro</label>
             <Input placeholder="Centro" value={draft.bairro} onChange={(e) => setDraft({ ...draft, bairro: e.target.value })} />
           </div>
-          <div className="lg:col-span-2">
+          <div className="md:col-span-2">
             <label className="block text-xs text-slate-300 mb-1">Cidade</label>
             <Input placeholder="Sua Cidade" value={draft.cidade} onChange={(e) => setDraft({ ...draft, cidade: e.target.value })} />
           </div>
-          <div className="lg:col-span-2">
+          <div className="md:col-span-2"> 
             <Button className="w-full" onClick={handleCreate}>Cadastrar Cliente</Button>
           </div>
         </div>
       </Card>
 
       <Card title="Lista de Clientes">
-        <div className="overflow-auto">
+        {/* === VISUALIZAÇÃO DE TABELA (Apenas Desktop) === */}
+        <div className="overflow-x-auto hidden md:block"> 
           <table className="min-w-full text-sm">
             <thead>
               <tr className="text-left text-slate-400">
@@ -199,10 +264,18 @@ function Clientes() {
             <tbody>
               {loading && <tr><td colSpan="9" className="text-center p-4">Carregando...</td></tr>}
               {!loading && clientes.map(cliente => (
-                <ClienteRow key={cliente.id} cliente={cliente} onUpdate={handleUpdate} />
+                <ClienteTableItem key={cliente.id} cliente={cliente} onUpdate={handleUpdate} />
               ))}
             </tbody>
           </table>
+        </div>
+
+        {/* === VISUALIZAÇÃO DE CARDS (Apenas Mobile) === */}
+        <div className="block md:hidden space-y-4">
+          {loading && <div className="text-center p-4">Carregando...</div>}
+          {!loading && clientes.map(cliente => (
+            <ClienteCard key={cliente.id} cliente={cliente} onUpdate={handleUpdate} />
+          ))}
         </div>
       </Card>
     </div>
