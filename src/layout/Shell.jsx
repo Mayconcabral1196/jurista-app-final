@@ -12,7 +12,6 @@ import Contracts from '../pages/Contracts.jsx';
 function Shell({ session }) {
   const [active, setActive] = useState("dashboard");
   const [rows, setRows] = useState([]);
-  // Mantemos o estado para o Desktop, mas não usamos mais no mobile
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   
   useEffect(() => {
@@ -49,7 +48,6 @@ function Shell({ session }) {
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col md:flex-row">
       
       {/* === HEADER MOBILE === */}
-      {/* Alteração 1: Removido o botão Sanduíche e centralizado o Título */}
       <div className="md:hidden bg-slate-900 border-b border-slate-800 p-4 flex items-center justify-center sticky top-0 z-20 h-14">
         <span className="text-lg font-bold text-emerald-400 tracking-wide">Jurista App</span>
       </div>
@@ -66,8 +64,8 @@ function Shell({ session }) {
       </div>
 
       {/* === CONTEÚDO PRINCIPAL === */}
-      {/* Alteração 2: Ajuste no 'pb-24' (padding-bottom) para o conteúdo não ficar atrás da Navbar */}
-      <main className="flex-1 p-4 md:p-6 grid gap-4 overflow-auto h-[calc(100dvh-56px)] md:h-[100dvh] pb-24 md:pb-6">
+      {/* MUDANÇA AQUI: Aumentei de pb-24 para pb-40 para garantir espaço extra no iPhone */}
+      <main className="flex-1 p-4 md:p-6 grid gap-4 overflow-auto h-[calc(100dvh-56px)] md:h-[100dvh] pb-40 md:pb-6">
         
         {active === "dashboard" && <Dashboard rows={rows} />}
         {active === "emprestimos" && <LoansTable rows={rows} setRows={setRows} scope="ativos" />}
@@ -76,6 +74,9 @@ function Shell({ session }) {
         {active === "clientes" && <Clientes />}
         {active === "relatorios" && <Reports rows={rows} setRows={setRows} />}
         {active === "contratos" && <Contracts rows={rows} setRows={setRows} goTo={setActive} />}
+
+        {/* Div espaçadora extra para garantir que o scroll desça até o fim no mobile */}
+        <div className="h-12 md:hidden w-full block"></div>
 
       </main>
 
