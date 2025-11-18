@@ -27,10 +27,11 @@ function App() {
     return <div className="min-h-screen bg-slate-950 text-slate-100 grid place-items-center">Carregando...</div>;
   }
 
-  // Se não houver sessão, mostra o ecrã de login.
-  // Se houver sessão, mostra o painel principal da aplicação.
+  
   return (
-    <div>
+    // Adicionei 'min-h-screen' (altura total) e 'w-full' (largura total)
+    // bg-slate-50 garante uma cor de fundo padrão para não ficar transparente
+    <div className="min-h-screen w-full bg-slate-50">
       {!session ? <AuthScreen /> : <Shell key={session.user.id} session={session} />}
     </div>
   );
