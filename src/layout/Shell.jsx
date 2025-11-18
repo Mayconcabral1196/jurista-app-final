@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Sidebar from './Sidebar.jsx';
+import BottomNav from './BottomNav.jsx'; // NOVO: Importa a navegação inferior
 import { supabase } from '../supabaseClient.js'; 
 
 import Clientes from '../pages/Clientes.jsx';
@@ -11,11 +12,11 @@ import Contracts from '../pages/Contracts.jsx';
 function Shell({ session }) {
   const [active, setActive] = useState("dashboard");
   const [rows, setRows] = useState([]);
-  // Estado para controlar se o menu mobile está aberto
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   
   useEffect(() => {
     async function getEmprestimos() {
+      // ... (Restante da lógica de fetch de dados permanece igual)
       const { data, error } = await supabase
         .from('emprestimos')
         .select('*, clientes(id, nome)');
@@ -47,10 +48,10 @@ function Shell({ session }) {
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col md:flex-row">
       
-      {/* === HEADER MOBILE (Só aparece em telas pequenas) === */}
+      {/* === HEADER MOBILE (Agora é apenas o topo com o botão de menu) === */}
       <div className="md:hidden bg-slate-900 border-b border-slate-800 p-4 flex items-center justify-between sticky top-0 z-20">
         
-        {/* 1. O Botão agora vem PRIMEIRO (lado Esquerdo) */}
+        {/* Ordem invertida para botão Esquerda / Título Direita */}
         <button 
           onClick={() => setIsSidebarOpen(true)}
           className="p-2 text-slate-200 hover:bg-slate-800 rounded-lg"
@@ -61,22 +62,26 @@ function Shell({ session }) {
           </svg>
         </button>
 
-        {/* 2. O Texto agora vem DEPOIS (lado Direito) */}
-        <span className="text-lg font-bold text-emerald-400">Jurista</span>
+        <span className="text-lg font-bold text-emerald-400">Jurista App</span>
         
       </div>
 
-      {/* Sidebar: Passamos o estado de abrir/fechar */}
-      <Sidebar 
-        active={active} 
-        setActive={setActive} 
-        user={session.user} 
-        isOpen={isSidebarOpen}            // Novo
-        setIsOpen={setIsSidebarOpen}      // Novo
-      />
+      {/* Sidebar: Oculta no Mobile, Visível no Desktop */}
+      <div className="hidden md:flex">
+          <Sidebar 
+            active={active} 
+            setActive={setActive} 
+            user={session.user} 
+            isOpen={isSidebarOpen}            
+            setIsOpen={setIsSidebarOpen}      
+          />
+      </div>
 
-      {/* Conteúdo Principal */}
-      <main className="flex-1 p-4 md:p-6 grid gap-4 overflow-auto h-[calc(100dvh-65px)] md:h-[100dvh]">
+      {/* Conteúdo Principal: Altura ajustada para o Bottom Nav no Mobile */}
+      <main className="flex-1 p-4 md:p-6 grid gap-4 overflow-auto 
+                     h-[calc(100dvh - 56px - 64px)] md:h-[100dvh]">
+        {/* A altura "56px" é o header mobile, e "64px" é o BottomNav */}
+        
         {active === "dashboard" && <Dashboard rows={rows} />}
         {active === "emprestimos" && <LoansTable rows={rows} setRows={setRows} scope="ativos" />}
         {active === "atrasados" && <LoansTable rows={rows} setRows={setRows} scope="atrasados" />}
@@ -85,6 +90,9 @@ function Shell({ session }) {
         {active === "relatorios" && <Reports rows={rows} setRows={setRows} />}
         {active === "contratos" && <Contracts rows={rows} setRows={setRows} goTo={setActive} />}
       </main>
+
+      {/* NOVO: Navegação Inferior (Só visível no Mobile) */}
+      <BottomNav active={active} setActive={setActive} />
     </div>
   );
 }
