@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Sidebar from './Sidebar.jsx';
-import BottomNav from './BottomNav.jsx'; // NOVO: Importa a navegação inferior
+import BottomNav from './BottomNav.jsx'; 
 import { supabase } from '../supabaseClient.js'; 
 
 import Clientes from '../pages/Clientes.jsx';
@@ -12,11 +12,11 @@ import Contracts from '../pages/Contracts.jsx';
 function Shell({ session }) {
   const [active, setActive] = useState("dashboard");
   const [rows, setRows] = useState([]);
+  // Mantemos o estado para o Desktop, mas não usamos mais no mobile
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   
   useEffect(() => {
     async function getEmprestimos() {
-      // ... (Restante da lógica de fetch de dados permanece igual)
       const { data, error } = await supabase
         .from('emprestimos')
         .select('*, clientes(id, nome)');
@@ -48,22 +48,10 @@ function Shell({ session }) {
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col md:flex-row">
       
-      {/* === HEADER MOBILE (Agora é apenas o topo com o botão de menu) === */}
-      <div className="md:hidden bg-slate-900 border-b border-slate-800 p-4 flex items-center justify-between sticky top-0 z-20">
-        
-        {/* Ordem invertida para botão Esquerda / Título Direita */}
-        <button 
-          onClick={() => setIsSidebarOpen(true)}
-          className="p-2 text-slate-200 hover:bg-slate-800 rounded-lg"
-        >
-          {/* Ícone de Menu Hambúrguer */}
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-          </svg>
-        </button>
-
-        <span className="text-lg font-bold text-emerald-400">Jurista App</span>
-        
+      {/* === HEADER MOBILE === */}
+      {/* Alteração 1: Removido o botão Sanduíche e centralizado o Título */}
+      <div className="md:hidden bg-slate-900 border-b border-slate-800 p-4 flex items-center justify-center sticky top-0 z-20 h-14">
+        <span className="text-lg font-bold text-emerald-400 tracking-wide">Jurista App</span>
       </div>
 
       {/* Sidebar: Oculta no Mobile, Visível no Desktop */}
@@ -77,10 +65,9 @@ function Shell({ session }) {
           />
       </div>
 
-      {/* Conteúdo Principal: Altura ajustada para o Bottom Nav no Mobile */}
-      <main className="flex-1 p-4 md:p-6 grid gap-4 overflow-auto 
-                     h-[calc(100dvh - 56px - 64px)] md:h-[100dvh]">
-        {/* A altura "56px" é o header mobile, e "64px" é o BottomNav */}
+      {/* === CONTEÚDO PRINCIPAL === */}
+      {/* Alteração 2: Ajuste no 'pb-24' (padding-bottom) para o conteúdo não ficar atrás da Navbar */}
+      <main className="flex-1 p-4 md:p-6 grid gap-4 overflow-auto h-[calc(100dvh-56px)] md:h-[100dvh] pb-24 md:pb-6">
         
         {active === "dashboard" && <Dashboard rows={rows} />}
         {active === "emprestimos" && <LoansTable rows={rows} setRows={setRows} scope="ativos" />}
@@ -89,9 +76,10 @@ function Shell({ session }) {
         {active === "clientes" && <Clientes />}
         {active === "relatorios" && <Reports rows={rows} setRows={setRows} />}
         {active === "contratos" && <Contracts rows={rows} setRows={setRows} goTo={setActive} />}
+
       </main>
 
-      {/* NOVO: Navegação Inferior (Só visível no Mobile) */}
+      {/* Navegação Inferior (Só visível no Mobile) */}
       <BottomNav active={active} setActive={setActive} />
     </div>
   );
